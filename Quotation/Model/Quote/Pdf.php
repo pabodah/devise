@@ -4,9 +4,12 @@
  */
 namespace Devis\Quotation\Model\Quote;
 
+use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\Response\Http\FileFactory;
 use Magento\Framework\Stdlib\DateTime\DateTime;
+use Magento\Quote\Api\CartRepositoryInterface;
+use Psr\Log\LoggerInterface;
 
 class Pdf
 {
@@ -21,22 +24,61 @@ class Pdf
     protected $dateTime;
 
     /**
+     * @var CartRepositoryInterface
+     */
+    protected $cartRepositoryInterface;
+
+    /**
+     * @var Session
+     */
+    protected $checkoutSession;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * Pdf constructor.
      * @param FileFactory $fileFactory
      * @param DateTime $dateTime
+     * @param CartRepositoryInterface $cartRepositoryInterface
+     * @param Session $checkoutSession
+     * @param LoggerInterface $logger
      */
     public function __construct(
         FileFactory $fileFactory,
-        DateTime $dateTime
+        DateTime $dateTime,
+        CartRepositoryInterface $cartRepositoryInterface,
+        Session $checkoutSession,
+        LoggerInterface $logger
     ) {
         $this->fileFactory = $fileFactory;
         $this->dateTime = $dateTime;
+        $this->cartRepositoryInterface = $cartRepositoryInterface;
+        $this->checkoutSession = $checkoutSession;
+        $this->logger = $logger;
     }
 
     /**
-     * @throws \Zend_Pdf_Exception
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getPdf()
+    {
+        try {
+            $currentQuote = $this->cartRepositoryInterface->get($this->checkoutSession->getQuoteId());
+            $this->generate($currentQuote);
+        } catch (\Exception $e) {
+            $this->logger->debug($e->getMessage());
+        }
+    }
+
+    /**
+     * @param $quote
+     * @return \Magento\Framework\App\ResponseInterface
+     * @throws \Zend_Pdf_Exception
+     */
+    public function generate($quote)
     {
         $pdf = new \Zend_Pdf();
         $pdf->pages[] = $pdf->newPage(\Zend_Pdf_Page::SIZE_A4);
@@ -57,6 +99,7 @@ class Pdf
         $page->drawRectangle(30, $this->y + 10, $page->getWidth()-30, $this->y +70, \Zend_Pdf_Page::SHAPE_DRAW_STROKE);
         $style->setFont($font, 15);
         $page->setStyle($style);
+
         $page->drawText(__("Cutomer Details"), $x + 5, $this->y+50, 'UTF-8');
         $style->setFont($font, 11);
         $page->setStyle($style);

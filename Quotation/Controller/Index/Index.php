@@ -2,7 +2,6 @@
 /**
  * Copyright (c) Devis
  */
-
 namespace Devis\Quotation\Controller\Index;
 
 use Magento\Framework\App\Action\Action;
@@ -17,7 +16,9 @@ class Index extends Action
     protected $quotePdf;
 
     /**
-     * @param Context            $context
+     * Index constructor.
+     * @param Context $context
+     * @param QuotePdf $quotePdf
      */
     public function __construct(
         Context $context,
