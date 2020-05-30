@@ -1,0 +1,16 @@
+<?php
+/**
+ * Copyright (c) Devis
+ */
+
+/** @var $block \Devis\Quotation\Block\Cart */
+?>
+<?php if ($block->isQuotationEnabled()) :?>
+    <button type="button"
+            data-role="proceed-to-checkout"
+            title="<?= $block->escapeHtmlAttr(__('Get Quotation')) ?>"
+            onclick="window.location='<?php echo $this->getUrl('quotation/index') ?>'"
+            class="action primary quotation">
+        <span><?= $block->escapeHtml(__('Get Quotation')) ?></span>
+    </button>
+<?php endif ?>

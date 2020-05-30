@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<!--
+/**
+ * Copyright (c) Devis
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="devis" sortOrder="999" translate="label">
+            <label>devis</label>
+        </tab>
+        <section id="quotation_settings" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
+            <label>Quotation</label>
+            <tab>devis</tab>
+            <resource>Devis_Quotation::config_general</resource>
+            <group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
+                <label>General</label>
+                <field id="is_enable" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>If enabled quotations can be generated from frontend</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

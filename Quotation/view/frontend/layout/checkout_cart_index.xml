@@ -6,10 +6,9 @@
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
-        <referenceBlock name="checkout.cart.methods.onepage.bottom">
-            <action method="setTemplate">
-                <argument name="template" xsi:type="string">Devis_Quotation::onepage/link.phtml</argument>
-            </action>
-        </referenceBlock>
+        <referenceContainer name="checkout.cart.totals.container">
+            <block class="Devis\Quotation\Block\Cart" name="checkout.cart.quotation.block"
+                   after="checkout.cart.methods.onepage.bottom" template="Devis_Quotation::onepage/quotation.phtml" />
+        </referenceContainer>
     </body>
 </page>
