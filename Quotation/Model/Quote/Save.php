@@ -4,6 +4,10 @@
  */
 namespace Devis\Quotation\Model\Quote;
 
+use Devis\Quotation\Model\QuotationFactory;
+use Devis\Quotation\Model\ResourceModel\Quotation as ResourceQuotation;
+use Magento\Catalog\Model\Product\Option;
+use Magento\Catalog\Model\ProductFactory;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\Response\Http\FileFactory;
@@ -11,7 +15,7 @@ use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
-class Pdf
+class Save
 {
     /**
      * @var FileFactory
@@ -38,6 +42,14 @@ class Pdf
      */
     protected $logger;
 
+    protected $quotationFactory;
+
+    protected $resourceQuotation;
+
+    protected $productFactory;
+
+    protected $option;
+
     /**
      * Pdf constructor.
      * @param FileFactory $fileFactory
@@ -45,32 +57,100 @@ class Pdf
      * @param CartRepositoryInterface $cartRepositoryInterface
      * @param Session $checkoutSession
      * @param LoggerInterface $logger
+     * @param QuotationFactory $quotationFactory
+     * @param ResourceQuotation $resourceQuotation
+     * @param ProductFactory $productFactory
      */
     public function __construct(
         FileFactory $fileFactory,
         DateTime $dateTime,
         CartRepositoryInterface $cartRepositoryInterface,
         Session $checkoutSession,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        QuotationFactory $quotationFactory,
+        ResourceQuotation $resourceQuotation,
+        ProductFactory $productFactory,
+        Option $option
     ) {
         $this->fileFactory = $fileFactory;
         $this->dateTime = $dateTime;
         $this->cartRepositoryInterface = $cartRepositoryInterface;
         $this->checkoutSession = $checkoutSession;
         $this->logger = $logger;
+        $this->quotationFactory = $quotationFactory;
+        $this->resourceQuotation = $resourceQuotation;
+        $this->productFactory = $productFactory;
+        $this->option = $option;
     }
 
     /**
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getPdf()
+    public function addData()
     {
         try {
-            $currentQuote = $this->cartRepositoryInterface->get($this->checkoutSession->getQuoteId());
-            $this->generate($currentQuote);
+            $model = $this->quotationFactory->create();
+            $items = $this->cartRepositoryInterface->get($this->checkoutSession->getQuoteId())->getItems();
+
+            foreach ($items as $item) {
+                $options = $item->getProduct()->getTypeInstance(true)->getOrderOptions($item->getProduct());
+                $customOptions = $options['attributes_info'];
+
+                $model->addData([
+                    "product_id" => $item->getItemId(),
+                    "qty" => $item->getQty(),
+                    "product_options" => json_encode($customOptions),
+                    "quote_id" => $item->getQuoteId()
+                ]);
+                $saveData = $this->resourceQuotation->save($model);
+            }
         } catch (\Exception $e) {
             $this->logger->debug($e->getMessage());
         }
+    }
+
+    public function createQuote()
+    {
+        /*$collection = $this->quotationFactory->create();
+        $items = $collection->getCollection()->addFilter('quote_id', 10)->getItems();
+        //$quote->addAttributeToFilter('quote_id', 10);
+        foreach ($items as $item) {
+            $product = $this->productFactory->create()->load(26);
+            $cart = $this->cartRepositoryInterface;
+
+            $params = [];
+            $options = [];
+            $params['qty'] = $item->getData('qty');
+            $params['product'] = $item->getData('product_id');
+
+            foreach (json_decode($item->getData('product_options')) as $o) {
+                foreach ($o->getValues() as $value) {
+                    $options[$value['option_id']] = $value['option_value'];
+                }
+            }
+            $params['options'] = $options;
+            $cart->addProduct($product, $params);
+            $cart->save();
+        }*/
+
+        /*$product = $this->productFactory->load(26);
+
+        $cart = $this->cartRepositoryInterface;
+
+        $params = [];
+        $options = [];
+        $params['qty'] = 1;
+        $params['product'] = 26;
+
+        foreach ($product->getOptions() as $o) {
+            foreach ($o->getValues() as $value) {
+                $options[$value['option_id']] = $value['option_type_id'];
+            }
+        }
+
+        $params['options'] = $options;
+        $cart->addProduct($product, $params);
+        $cart->save();*/
     }
 
     /**

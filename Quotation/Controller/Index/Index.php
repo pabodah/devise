@@ -4,28 +4,28 @@
  */
 namespace Devis\Quotation\Controller\Index;
 
+use Devis\Quotation\Model\Quote\Save as QuoteSave;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
-use Devis\Quotation\Model\Quote\Pdf as QuotePdf;
 
 class Index extends Action
 {
     /**
-     * @var QuotePdf
+     * @var QuoteSave
      */
-    protected $quotePdf;
+    protected $quoteSave;
 
     /**
      * Index constructor.
      * @param Context $context
-     * @param QuotePdf $quotePdf
+     * @param QuoteSave $quoteSave
      */
     public function __construct(
         Context $context,
-        QuotePdf $quotePdf
+        QuoteSave $quoteSave
     ) {
-        $this->quotePdf = $quotePdf;
         parent::__construct($context);
+        $this->quoteSave = $quoteSave;
     }
 
     /**
@@ -34,6 +34,6 @@ class Index extends Action
      */
     public function execute()
     {
-        $this->quotePdf->getPdf();
+        $this->quoteSave->addData();
     }
 }
