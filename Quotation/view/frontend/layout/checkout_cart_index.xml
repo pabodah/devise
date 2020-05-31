@@ -7,7 +7,7 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="checkout.cart.totals.container">
-            <block class="Devis\Quotation\Block\Cart" name="checkout.cart.quotation.block"
+            <block class="Devis\Quotation\Block\Cart\AddToQuotation" name="checkout.cart.quotation.block"
                    after="checkout.cart.methods.onepage.bottom" template="Devis_Quotation::onepage/quotation.phtml" />
         </referenceContainer>
     </body>

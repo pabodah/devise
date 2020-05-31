@@ -3,15 +3,13 @@
  * Copyright (c) Devis
  */
 
-namespace Devis\Quotation\Block;
+namespace Devis\Quotation\Block\Cart;
 
 use Magento\Framework\View\Element\Template;
 use Devis\Quotation\Model\Config;
 
-class Cart extends Template
+class AddToQuotation extends Template
 {
-    protected $modelGenerate;
-
     /**
      * @var Config
      */
@@ -30,14 +28,6 @@ class Cart extends Template
     ) {
         parent::__construct($context, $data);
         $this->config = $config;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getContent()
-    {
-        return $this->modelGenerate->getData();
     }
 
     /**
