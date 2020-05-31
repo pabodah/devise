@@ -97,35 +97,24 @@ class Pdf
         $style->setFont($font, 16);
         $page->setStyle($style);
         $page->drawRectangle(30, $this->y + 10, $page->getWidth()-30, $this->y +70, \Zend_Pdf_Page::SHAPE_DRAW_STROKE);
-        $style->setFont($font, 15);
-        $page->setStyle($style);
 
-        $page->drawText(__("Cutomer Details"), $x + 5, $this->y+50, 'UTF-8');
         $style->setFont($font, 11);
         $page->setStyle($style);
-        $page->drawText(__("Name : %1", "John Smith"), $x + 5, $this->y+33, 'UTF-8');
-        $page->drawText(__("Email : %1", "test@example.com"), $x + 5, $this->y+16, 'UTF-8');
+        $page->drawText(__("Quote ID : %1", "100000"), $x + 5, $this->y+33, 'UTF-8');
 
         $style->setFont($font, 12);
         $page->setStyle($style);
         $page->drawText(__("PRODUCT NAME"), $x + 60, $this->y-10, 'UTF-8');
-        $page->drawText(__("PRICE"), $x + 200, $this->y-10, 'UTF-8');
-        $page->drawText(__("QUANTITY"), $x + 310, $this->y-10, 'UTF-8');
-        $page->drawText(__("TOTAL"), $x + 440, $this->y-10, 'UTF-8');
+        $page->drawText(__("Product Options"), $x + 200, $this->y-10, 'UTF-8');
 
         $style->setFont($font, 10);
         $page->setStyle($style);
         $add = 9;
-        $page->drawText("$10.00", $x + 210, $this->y-30, 'UTF-8');
-        $page->drawText(5, $x + 330, $this->y-30, 'UTF-8');
-        $page->drawText("$50.00", $x + 470, $this->y-30, 'UTF-8');
+        $page->drawText("Size: M, Color: Red", $x + 210, $this->y-30, 'UTF-8');
         $pro = "ABC product";
         $page->drawText($pro, $x + 65, $this->y-30, 'UTF-8');
         $page->drawRectangle(30, $this->y -62, $page->getWidth()-30, $this->y + 10, \Zend_Pdf_Page::SHAPE_DRAW_STROKE);
-        $page->drawRectangle(30, $this->y -62, $page->getWidth()-30, $this->y - 100, \Zend_Pdf_Page::SHAPE_DRAW_STROKE);
-        $style->setFont($font, 15);
-        $page->setStyle($style);
-        $page->drawText(__("Total : %1", "$50.00"), $x + 435, $this->y-85, 'UTF-8');
+
         $style->setFont($font, 10);
         $page->setStyle($style);
         $page->drawText(__("ABC Footer example"), ($page->getWidth()/2)-50, $this->y-200);
