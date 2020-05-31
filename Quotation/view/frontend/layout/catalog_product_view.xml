@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) Davis
+ */
+-->
+<page layout="1column" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <referenceBlock name="product.info.main">
+        <block class="Devis\Quotation\Block\Product\View\AddToQuotation"
+               name="product.info.quotation"
+               template="Devis_Quotation::product/view/addtoquotation.phtml"
+               after="product.info.addtocart"/>
+    </referenceBlock>
+</page>

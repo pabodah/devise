@@ -1,0 +1,18 @@
+<?php
+/**
+ * Copyright (c) Davis
+ */
+
+/** @var $block \Devis\Quotation\Block\Product\View\AddToQuotation */
+?>
+
+<?php if ($block->isQuotationEnabled()) :?>
+<div class="actions">
+    <button type="submit"
+            title="<?= __('Get Quotation') ?>"
+            class="action primary tocart"
+            id="product-addtoquote-button" disabled>
+        <span><?= __('Get Quotation') ?></span>
+    </button>
+</div>
+<?php endif; ?>
