@@ -1,0 +1,14 @@
+{
+    "devis_quotation": {
+        "column": {
+            "id": true,
+            "product_id": true,
+            "product_options": true,
+            "quote_id": true,
+            "qty": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    }
+}

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="devis_quotation" resource="default" engine="innodb" comment="Devis Quotation">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="ID"/>
+        <column xsi:type="int" name="product_id" padding="10" comment="Product ID"/>
+        <column xsi:type="int" name="qty" padding="10" comment="Qty"/>
+        <column xsi:type="varchar" name="product_options" comment="Product Options"/>
+        <column xsi:type="int" name="quote_id" padding="10" comment="Quote ID"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+</schema>
