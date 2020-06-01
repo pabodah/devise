@@ -34,6 +34,20 @@ class Index extends Action
      */
     public function execute()
     {
-        $this->quoteSave->addData();
+        //$this->quoteSave->addData();
+
+        $post = $this->getRequest()->getParam('input_val');
+
+        //Your logic
+
+        $this->quoteSave->createCustomQuote($post);
+
+        $response = $this->resultFactory
+            ->create(\Magento\Framework\Controller\ResultFactory::TYPE_JSON)
+            ->setData([
+                'status'  => "success"
+            ]);
+
+        return $response;
     }
 }

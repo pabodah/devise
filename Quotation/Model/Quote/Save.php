@@ -86,7 +86,7 @@ class Save
     /**
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function addData()
+    public function addOtherData()
     {
         try {
             $model = $this->quotationFactory->create();
@@ -107,6 +107,24 @@ class Save
         } catch (\Exception $e) {
             $this->logger->debug($e->getMessage());
         }
+    }
+
+    /**
+     * @param $post
+     * @throws \Magento\Framework\Exception\AlreadyExistsException
+     */
+    public function createCustomQuote($post)
+    {
+        $model = $this->quotationFactory->create();
+
+        $model->addData([
+            "product_id" => $post['product'],
+            "qty" => $post['qty'],
+            "product_options" => json_encode($post['attributes']),
+            "quote_id" => 0
+        ]);
+
+        $saveData = $this->resourceQuotation->save($model);
     }
 
     public function createQuote()
