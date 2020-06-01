@@ -42,12 +42,12 @@ class Index extends Action
 
         $this->quoteSave->createCustomQuote($post);
 
-        $response = $this->resultFactory
+        /*$response = $this->resultFactory
             ->create(\Magento\Framework\Controller\ResultFactory::TYPE_JSON)
             ->setData([
                 'status'  => "success"
             ]);
 
-        return $response;
+        return $response;*/
     }
 }

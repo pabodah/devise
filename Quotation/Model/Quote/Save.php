@@ -14,6 +14,7 @@ use Magento\Framework\App\Response\Http\FileFactory;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Psr\Log\LoggerInterface;
+use Magento\Catalog\Model\ProductRepository;
 
 class Save
 {
@@ -49,6 +50,7 @@ class Save
     protected $productFactory;
 
     protected $option;
+    protected $productRepository;
 
     /**
      * Pdf constructor.
@@ -70,7 +72,8 @@ class Save
         QuotationFactory $quotationFactory,
         ResourceQuotation $resourceQuotation,
         ProductFactory $productFactory,
-        Option $option
+        Option $option,
+        ProductRepository $productRepository
     ) {
         $this->fileFactory = $fileFactory;
         $this->dateTime = $dateTime;
@@ -81,6 +84,7 @@ class Save
         $this->resourceQuotation = $resourceQuotation;
         $this->productFactory = $productFactory;
         $this->option = $option;
+        $this->productRepository = $productRepository;
     }
 
     /**
@@ -115,16 +119,43 @@ class Save
      */
     public function createCustomQuote($post)
     {
-        $model = $this->quotationFactory->create();
+        try {
+            $model = $this->quotationFactory->create();
+            $model->setData('product_id', $post["product"]);
+            $model->setData('qty', $post["qty"]);
+            $model->setData('product_options', json_encode($post['attributes']));
+            $model->setData('quote_id', 0);
+            $model->setData('product_options_name', json_encode($post['attribute_values']));
 
-        $model->addData([
-            "product_id" => $post['product'],
-            "qty" => $post['qty'],
-            "product_options" => json_encode($post['attributes']),
-            "quote_id" => 0
-        ]);
+            $this->resourceQuotation->save($model);
 
-        $saveData = $this->resourceQuotation->save($model);
+            $saveData = $this->resourceQuotation->save($model);
+
+            if ($saveData) {
+                return $this->generatePdf($model);
+            }
+        } catch (\Exception $e) {
+            $this->logger->debug($e->getMessage());
+        }
+    }
+
+    /**
+     * @param $model
+     * @return mixed
+     */
+    public function getAttributeOptions($model)
+    {
+        return $model['product_options_name'];
+    }
+
+    /**
+     * @param $model
+     * @return \Magento\Catalog\Api\Data\ProductInterface|mixed|null
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getProductName($model)
+    {
+        return $this->productRepository->getById($model['product_id']);
     }
 
     public function createQuote()
@@ -172,11 +203,12 @@ class Save
     }
 
     /**
-     * @param $quote
+     * @param $customQuote
      * @return \Magento\Framework\App\ResponseInterface
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \Zend_Pdf_Exception
      */
-    public function generate($quote)
+    public function generatePdf($customQuote)
     {
         $pdf = new \Zend_Pdf();
         $pdf->pages[] = $pdf->newPage(\Zend_Pdf_Page::SIZE_A4);
@@ -198,7 +230,7 @@ class Save
 
         $style->setFont($font, 11);
         $page->setStyle($style);
-        $page->drawText(__("Quote ID : %1", "100000"), $x + 5, $this->y+33, 'UTF-8');
+        $page->drawText(__("Quote ID : %1", $customQuote->getId()), $x + 5, $this->y+33, 'UTF-8');
 
         $style->setFont($font, 12);
         $page->setStyle($style);
@@ -208,8 +240,9 @@ class Save
         $style->setFont($font, 10);
         $page->setStyle($style);
         $add = 9;
-        $page->drawText("Size: M, Color: Red", $x + 210, $this->y-30, 'UTF-8');
-        $pro = "ABC product";
+        $page->drawText($this->getAttributeOptions($customQuote), $x + 210, $this->y-30, 'UTF-8');
+        //$pro = $this->getProductName($customQuote);
+        $pro = 'TEST';
         $page->drawText($pro, $x + 65, $this->y-30, 'UTF-8');
         $page->drawRectangle(30, $this->y -62, $page->getWidth()-30, $this->y + 10, \Zend_Pdf_Page::SHAPE_DRAW_STROKE);
 
