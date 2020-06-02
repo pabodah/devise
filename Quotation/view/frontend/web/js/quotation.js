@@ -5,22 +5,20 @@ define([
 
     $( "#product-addtoquote-button" ).click(function() {
         var textinput = '';
-
-        getAttributeData();
-
         $.ajax ({
-            url: 'http://m234.com/quotation/index/index',
+            url: BASE_URL + ('quotation/index/index'),
             dataType: 'json',
             data: {
                 input_val : getAttributeData()
             },
             success: function(data) {
-                //console.log(data);
+                window.location.replace(BASE_URL + ('quotation/index/pdf/id/') + data.status);
             }
         });
     });
 
-    function getAttributeData () {
+    function getAttributeData ()
+    {
         var parameters = {};
         var selected_options = {};
         var selected_options_values = {};

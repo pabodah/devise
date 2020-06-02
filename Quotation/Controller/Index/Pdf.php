@@ -8,7 +8,7 @@ use Devis\Quotation\Model\Quote\Save as QuoteSave;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 
-class Index extends Action
+class Pdf extends Action
 {
     /**
      * @var QuoteSave
@@ -34,15 +34,7 @@ class Index extends Action
      */
     public function execute()
     {
-        $post = $this->getRequest()->getParam('input_val');
-        $customQuote = $this->quoteSave->createCustomQuote($post);
-
-        $response = $this->resultFactory
-            ->create(\Magento\Framework\Controller\ResultFactory::TYPE_JSON)
-            ->setData([
-                'status'  => $customQuote
-            ]);
-
-        return $response;
+        $customInvoiceId = $this->getRequest()->getParam('id');
+        $this->quoteSave->generatePdf($customInvoiceId);
     }
 }
