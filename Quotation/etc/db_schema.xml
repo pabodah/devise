@@ -6,6 +6,7 @@
         <column xsi:type="int" name="product_id" padding="10" comment="Product ID"/>
         <column xsi:type="int" name="qty" padding="10" comment="Qty"/>
         <column xsi:type="varchar" name="product_options" comment="Product Options"/>
+        <column xsi:type="varchar" name="product_options_names" comment="Product Options Names"/>
         <column xsi:type="int" name="quote_id" padding="10" comment="Quote ID"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>

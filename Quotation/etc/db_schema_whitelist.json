@@ -5,7 +5,8 @@
             "product_id": true,
             "product_options": true,
             "quote_id": true,
-            "qty": true
+            "qty": true,
+            "product_options_names": true
         },
         "constraint": {
             "PRIMARY": true
