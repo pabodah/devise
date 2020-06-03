@@ -317,10 +317,11 @@ class Save
     public function getProductName($id)
     {
         $i = 0;
+        $a = '';
         $quote = $this->quotationRepository->getById($id);
         foreach (json_decode($quote['product_id']) as $item) {
-            $product = $this->productRepository->getById(json_decode($quote['product_id'])[$i]);
-            $a = $product->getName();
+            $product = $this->productRepository->getById($item);
+            $a .= $product->getName() . "\r\n";
             $i++;
         }
         return $a;
