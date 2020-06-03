@@ -51,7 +51,13 @@ class Index extends Action
                     'status'  => $customQuote
                 ]);
         } else {
-            $this->quoteSave->createCustomQuote($this->cart->getQuote(), 'quote');
+            $quote = $this->quoteSave->createCustomQuote($this->cart->getQuote(), 'quote');
+
+            if ($quote) {
+                $resultRedirect = $this->resultRedirectFactory->create();
+                $resultRedirect->setPath('checkout/cart');
+                return $resultRedirect;
+            }
         }
 
     }

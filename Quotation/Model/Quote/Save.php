@@ -194,15 +194,12 @@ class Save
                 $model->setData('product_id', json_encode($productIds));
                 $this->resourceQuotation->save($model);
 
-                /*$model = $this->quotationFactory->create();
-                $model->setData('quote_id', $params->getId());
-                $this->resourceQuotation->save($model);*/
+                return $model->getId();
             }
         } catch (\Exception $e) {
             $this->logger->debug($e->getMessage());
             return false;
         }
-        return true;
     }
 
     /**
