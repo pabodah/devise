@@ -32,6 +32,13 @@ class AddToCart extends Action
      */
     public function execute()
     {
-        $this->quoteSave->createQuote();
+        $id = $this->getRequest()->getParam('id');
+        $quote = $this->quoteSave->createQuote($id);
+
+        if ($quote) {
+            $resultRedirect = $this->resultRedirectFactory->create();
+            $resultRedirect->setPath('checkout/cart');
+            return $resultRedirect;
+        }
     }
 }

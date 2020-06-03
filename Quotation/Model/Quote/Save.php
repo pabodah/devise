@@ -5,18 +5,18 @@
 namespace Devis\Quotation\Model\Quote;
 
 use Devis\Quotation\Model\QuotationFactory;
+use Devis\Quotation\Model\QuotationRepository;
 use Devis\Quotation\Model\ResourceModel\Quotation as ResourceQuotation;
 use Magento\Catalog\Model\ProductFactory;
+use Magento\Catalog\Model\ProductRepository;
+use Magento\Checkout\Model\Cart;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\Response\Http\FileFactory;
+use Magento\Framework\Data\Form\FormKey;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Psr\Log\LoggerInterface;
-use Magento\Catalog\Model\ProductRepository;
-use Devis\Quotation\Model\QuotationRepository;
-use Magento\Framework\Data\Form\FormKey;
-use Magento\Checkout\Model\Cart;
 
 class Save
 {
@@ -108,13 +108,14 @@ class Save
             $model = $this->quotationFactory->create();
             $model->setData('product_id', $post["product"]);
             $model->setData('qty', $post["qty"]);
-            $model->setData('product_options', json_encode($post['attributes']));
             $model->setData('quote_id', 0);
-            $model->setData('product_options_names', json_encode($post['attribute_values']));
+
+            if (isset($post['attributes'])) {
+                $model->setData('product_options', json_encode($post['attributes']));
+                $model->setData('product_options_names', json_encode($post['attribute_values']));
+            }
+
             $this->resourceQuotation->save($model);
-
-            $saveData = $this->resourceQuotation->save($model);
-
             return $model->getId();
 
         } catch (\Exception $e) {
@@ -124,13 +125,14 @@ class Save
     }
 
     /**
+     * @param $id
      * @return Cart
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function createQuote()
+    public function createQuote($id)
     {
-        $quote = $this->quotationRepository->getById(52);
+        $quote = $this->quotationRepository->getById($id);
         $product = $this->productRepository->getById($quote->getProductId());
 
         $params = [];
@@ -143,8 +145,8 @@ class Save
         foreach (json_decode($quote->getProductOptions()) as $key=>$value) {
             $options[$key] = $value;
         }
-
         $params['super_attribute'] = $options;
+
         $this->cart->addProduct($product, $params);
         return $this->cart->save();
     }
@@ -216,7 +218,7 @@ class Save
      */
     public function getProductName($id)
     {
-        $quote = $this->quotationFactory->create()->load($id);
+        $quote = $this->quotationRepository->getById($id);
         $product = $this->productRepository->getById($quote['product_id']);
         return $product->getName();
     }
@@ -227,13 +229,22 @@ class Save
      */
     public function getSelectedOptions($id)
     {
-        $options = '';
-        $quote = $this->quotationFactory->create()->load($id);
-        $output = json_decode($quote['product_options_names']);
+        try {
+            $options = '';
+            $quote = $this->quotationRepository->getById($id);
 
-        foreach ($output as $key=>$value) {
-            $options .= $key . ': ' . $value . "," . "";
+            if (isset($quote['product_options_names'])) {
+                $output = json_decode($quote['product_options_names']);
+
+                foreach ($output as $key=>$value) {
+                    $options .= $key . ': ' . $value . "," . "";
+                }
+            }
+            return $options;
+
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
         }
-        return $options;
+        return false;
     }
 }
