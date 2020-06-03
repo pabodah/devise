@@ -7,10 +7,10 @@
 ?>
 <?php if ($block->isQuotationEnabled()) :?>
     <button type="button"
-            data-role="proceed-to-checkout"
             title="<?= $block->escapeHtmlAttr(__('Get Quotation')) ?>"
-            onclick="window.location='<?php echo $this->getUrl('quotation/index') ?>'"
-            class="action primary quotation">
+            data-mage-init='{"Devis_Quotation/js/quotation": {"config": "element"}}'
+            class="action primary quotation"
+            id="product-addtoquote-button-checkout">
         <span><?= $block->escapeHtml(__('Get Quotation')) ?></span>
     </button>
 <?php endif ?>

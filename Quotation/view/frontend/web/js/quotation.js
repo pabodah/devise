@@ -1,10 +1,15 @@
 define([
-    'jquery'
+    'jquery',
+    'loader'
 ], function ($) {
     'use strict';
 
     $( "#product-addtoquote-button" ).click(function() {
+        var body = $('body');
+        body.loader('show');
+
         $.ajax ({
+            showLoader: true,
             url: BASE_URL + ('quotation/index/index'),
             dataType: 'json',
             data: {
@@ -12,6 +17,23 @@ define([
             },
             success: function(data) {
                 window.location.replace(BASE_URL + ('quotation/index/pdf/id/') + data.status);
+                body.loader('hide');
+            }
+        });
+    });
+
+    $( "#product-addtoquote-button-checkout" ).click(function() {
+        var body = $('body');
+        body.loader('show');
+
+        $.ajax ({
+            showLoader: true,
+            url: BASE_URL + ('quotation/index/index'),
+            dataType: 'json',
+            data: {},
+            success: function(data) {
+                window.location.replace(BASE_URL + ('quotation/index/pdf/id/') + data.status);
+                body.loader('hide');
             }
         });
     });
@@ -32,7 +54,6 @@ define([
             var option_selected_name    = $(this).find('.swatch-attribute-selected-option').text();
 
             //console.log(attribute_id, option_selected);
-
             if(!attribute_id || !option_selected){ return;}
             selected_options[attribute_id] = option_selected;
             selected_options_values[attribute_name] = option_selected_name;

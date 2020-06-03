@@ -51,13 +51,18 @@ class Index extends Action
                     'status'  => $customQuote
                 ]);
         } else {
-            $quote = $this->quoteSave->createCustomQuote($this->cart->getQuote(), 'quote');
+            $customQuote = $this->quoteSave->createCustomQuote($this->cart->getQuote(), 'quote');
 
-            if ($quote) {
+            return $this->resultFactory
+                ->create(\Magento\Framework\Controller\ResultFactory::TYPE_JSON)
+                ->setData([
+                    'status'  => $customQuote
+                ]);
+            /*if ($quote) {
                 $resultRedirect = $this->resultRedirectFactory->create();
                 $resultRedirect->setPath('checkout/cart');
                 return $resultRedirect;
-            }
+            }*/
         }
 
     }

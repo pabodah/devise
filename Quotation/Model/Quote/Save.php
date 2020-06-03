@@ -127,18 +127,25 @@ class Save
     {
         try {
             if ($type == 'product') {
+                $productIds[0] = $params["product"];
+                $qty[0] = $params["qty"];
+                $attr[0] = $params['attributes'];
+                $attrVal[0] = $params['attribute_values'];
+
+
                 $model = $this->quotationFactory->create();
-                $model->setData('product_id', json_encode($params["product"]));
-                $model->setData('qty', json_encode($params["qty"]));
+                $model->setData('product_id', json_encode($productIds));
+                $model->setData('qty', json_encode($qty));
                 $model->setData('quote_id', 0);
 
                 if (isset($params['attributes'])) {
-                    $model->setData('product_options', json_encode($params['attributes']));
-                    $model->setData('product_options_names', json_encode($params['attribute_values']));
+                    $model->setData('product_options', json_encode($attr));
+                    $model->setData('product_options_names', json_encode($attrVal));
                 }
 
                 $this->resourceQuotation->save($model);
                 return $model->getId();
+
             } else {
                 $items = $params->getItems();
                 $productIds = [];
@@ -202,42 +209,39 @@ class Save
             $i = 0;
             $cartObj = null;
 
-            foreach (json_decode($customQuote->getProductId()) as $itemId) {
-                $params['product'] = $itemId;
-                $params['qty'] = json_decode($customQuote->getQty())[$i];
-                $params['item'] = json_decode($customQuote->getProductId())[$i];
+            if (is_array($customQuote->getProductId())) {
+                foreach (json_decode($customQuote->getProductId()) as $itemId) {
+                    $params['product'] = $itemId;
+                    $params['qty'] = json_decode($customQuote->getQty())[$i];
+                    $params['item'] = json_decode($customQuote->getProductId())[$i];
 
-                if (json_decode($customQuote->getProductOptions())) {
-                    foreach (json_decode($customQuote->getProductOptions())[$i] as $key=>$value) {
+                    if (json_decode($customQuote->getProductOptions())) {
+                        foreach (json_decode($customQuote->getProductOptions())[$i] as $key=>$value) {
+                            $options[$key] = $value;
+                            $params['super_attribute'] = $options;
+                        }
+                    }
+                    $product = $this->productRepository->getById($itemId);
+                    $this->cart->addProduct($product, $params);
+
+                    $i++;
+                }
+            } else {
+                $params['product'] = $customQuote->getProductId();
+                $params['qty'] = $customQuote->getQty();
+                $params['item'] = $customQuote->getProductId();
+
+                if ($customQuote->getProductOptions()) {
+                    foreach (json_decode($customQuote->getProductOptions()) as $key=>$value) {
                         $options[$key] = $value;
                         $params['super_attribute'] = $options;
                     }
                 }
-                $product = $this->productRepository->getById($itemId);
+                $product = $this->productRepository->getById($customQuote->getProductId());
                 $this->cart->addProduct($product, $params);
-
-                $i++;
             }
-
 
             $cartObj = $this->cart->save();
-
-            //$params['form_key'] = $this->formKey->getFormKey();
-            /*$params['qty'] = $customQuote->getQty();
-            $params['product'] = $customQuote->getProductId();
-            $params['item'] = $customQuote->getProductId();
-
-            if ($customQuote->getProductOptions()) {
-                foreach (json_decode($customQuote->getProductOptions()) as $key=>$value) {
-                    $options[$key] = $value;
-                    $params['super_attribute'] = $options;
-                }
-            }
-
-            $this->cart->addProduct($product, $params);
-            return $this->cart->save();*/
-            /*}*/
-
             return $cartObj;
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
@@ -312,9 +316,14 @@ class Save
      */
     public function getProductName($id)
     {
+        $i = 0;
         $quote = $this->quotationRepository->getById($id);
-        $product = $this->productRepository->getById($quote['product_id']);
-        return $product->getName();
+        foreach (json_decode($quote['product_id']) as $item) {
+            $product = $this->productRepository->getById(json_decode($quote['product_id'])[$i]);
+            $a = $product->getName();
+            $i++;
+        }
+        return $a;
     }
 
     /**
@@ -330,11 +339,13 @@ class Save
             if (isset($quote['product_options_names'])) {
                 $output = json_decode($quote['product_options_names']);
 
-                foreach ($output as $key=>$value) {
-                    $options .= $key . ': ' . $value . "," . "";
+                foreach ($output as $item) {
+                    foreach ($item as $key=>$value) {
+                        $options .= $key . ': ' . $value . "," . "";
+                    }
                 }
             }
-            return $options;
+            return rtrim($options, ',');
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
         }
