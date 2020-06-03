@@ -4,12 +4,11 @@ define([
     'use strict';
 
     $( "#product-addtoquote-button" ).click(function() {
-        var textinput = '';
         $.ajax ({
             url: BASE_URL + ('quotation/index/index'),
             dataType: 'json',
             data: {
-                input_val : getAttributeData()
+                attribute_data : getAttributeData()
             },
             success: function(data) {
                 window.location.replace(BASE_URL + ('quotation/index/pdf/id/') + data.status);

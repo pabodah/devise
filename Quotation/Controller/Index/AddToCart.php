@@ -33,7 +33,7 @@ class AddToCart extends Action
     public function execute()
     {
         $id = $this->getRequest()->getParam('id');
-        $quote = $this->quoteSave->createQuote($id);
+        $quote = $this->quoteSave->saveToQuote($id);
 
         if ($quote) {
             $resultRedirect = $this->resultRedirectFactory->create();

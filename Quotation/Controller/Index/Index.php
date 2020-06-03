@@ -7,6 +7,7 @@ namespace Devis\Quotation\Controller\Index;
 use Devis\Quotation\Model\Quote\Save as QuoteSave;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
+use Magento\Checkout\Model\Cart;
 
 class Index extends Action
 {
@@ -16,16 +17,22 @@ class Index extends Action
     protected $quoteSave;
 
     /**
+     * @var Cart
+     */
+    protected $cart;
+
+    /**
      * Index constructor.
      * @param Context $context
-     * @param QuoteSave $quoteSave
      */
     public function __construct(
         Context $context,
-        QuoteSave $quoteSave
+        QuoteSave $quoteSave,
+        Cart $cart
     ) {
         parent::__construct($context);
         $this->quoteSave = $quoteSave;
+        $this->cart = $cart;
     }
 
     /**
@@ -34,15 +41,18 @@ class Index extends Action
      */
     public function execute()
     {
-        $post = $this->getRequest()->getParam('input_val');
-        $customQuote = $this->quoteSave->createCustomQuote($post);
+        if ($this->getRequest()->getParam('attribute_data')) {
+            $attributes = $this->getRequest()->getParam('attribute_data');
+            $customQuote = $this->quoteSave->createCustomQuote($attributes, 'product');
 
-        $response = $this->resultFactory
-            ->create(\Magento\Framework\Controller\ResultFactory::TYPE_JSON)
-            ->setData([
-                'status'  => $customQuote
-            ]);
+            return $this->resultFactory
+                ->create(\Magento\Framework\Controller\ResultFactory::TYPE_JSON)
+                ->setData([
+                    'status'  => $customQuote
+                ]);
+        } else {
+            $this->quoteSave->createCustomQuote($this->cart->getQuote(), 'quote');
+        }
 
-        return $response;
     }
 }

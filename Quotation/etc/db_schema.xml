@@ -3,8 +3,8 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
     <table name="devis_quotation" resource="default" engine="innodb" comment="Devis Quotation">
         <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="ID"/>
-        <column xsi:type="int" name="product_id" padding="10" comment="Product ID"/>
-        <column xsi:type="int" name="qty" padding="10" comment="Qty"/>
+        <column xsi:type="varchar" name="product_id" comment="Product ID"/>
+        <column xsi:type="varchar" name="qty" comment="Qty"/>
         <column xsi:type="varchar" name="product_options" comment="Product Options"/>
         <column xsi:type="varchar" name="product_options_names" comment="Product Options Names"/>
         <column xsi:type="int" name="quote_id" padding="10" comment="Quote ID"/>
