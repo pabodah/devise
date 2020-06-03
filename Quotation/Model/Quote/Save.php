@@ -128,8 +128,8 @@ class Save
         try {
             if ($type == 'product') {
                 $model = $this->quotationFactory->create();
-                $model->setData('product_id', $params["product"]);
-                $model->setData('qty', $params["qty"]);
+                $model->setData('product_id', json_encode($params["product"]));
+                $model->setData('qty', json_encode($params["qty"]));
                 $model->setData('quote_id', 0);
 
                 if (isset($params['attributes'])) {
@@ -165,30 +165,13 @@ class Save
 
                     $customOptions_ids[] = $product_options;
                     $customOptions_values[] = $product_options_names;
-
-                    /*$model->setData('product_id', $item->getProductId());
-                    $model->setData('qty', $item->getQty());
-                    $model->setData('quote_id', $item->getQuoteId());
-
-                    $attributes = $item->getProduct()->getTypeInstance(true)->getOrderOptions($item->getProduct());
-                    $customOptions = $attributes['attributes_info'];
-                    $val = [];
-                    if (!empty($customOptions)) {
-                        foreach ($customOptions as $option) {
-                            $val[] = $option;
-                        }
-                    }
-
-                    if (isset($customOptions)) {
-                        $model->setData('product_options', json_encode($val));
-                    }*/
-
-
                 }
+
                 if (isset($customOptions)) {
                     $model->setData('product_options', json_encode($customOptions_ids));
                     $model->setData('product_options_names', json_encode($customOptions_values));
                 }
+
                 $model->setData('qty', json_encode($qty));
                 $model->setData('quote_id', $item->getQuoteId());
                 $model->setData('product_id', json_encode($productIds));
@@ -214,29 +197,33 @@ class Save
         try {
             $customQuote = $this->quotationRepository->getById($id);
 
-            /*if ($customQuote->getQuoteId()) {
-                $quote = $this->quoteFactory->create()->load($customQuote->getQuoteId());
-
-                if ($quote) {
-                    $quote->setIsActive(1);
-                    try {
-                        $this->cart->setQuote($quote);
-                        $this->cart->saveQuote();
-                        $quote->save();
-                        //$this->messageManager->addSuccess(__('Added to cart successfully.'));
-                    } catch (\Magento\Framework\Exception\LocalizedException $e) {
-                        //$this->messageManager->addException($e, __('%1', $e->getMessage()));
-                    }
-                }
-            } else {*/
-
-
-            $product = $this->productRepository->getById($customQuote->getProductId());
-
             $params = [];
             $options = [];
+            $i = 0;
+            $cartObj = null;
+
+            foreach (json_decode($customQuote->getProductId()) as $itemId) {
+                $params['product'] = $itemId;
+                $params['qty'] = json_decode($customQuote->getQty())[$i];
+                $params['item'] = json_decode($customQuote->getProductId())[$i];
+
+                if (json_decode($customQuote->getProductOptions())) {
+                    foreach (json_decode($customQuote->getProductOptions())[$i] as $key=>$value) {
+                        $options[$key] = $value;
+                        $params['super_attribute'] = $options;
+                    }
+                }
+                $product = $this->productRepository->getById($itemId);
+                $this->cart->addProduct($product, $params);
+
+                $i++;
+            }
+
+
+            $cartObj = $this->cart->save();
+
             //$params['form_key'] = $this->formKey->getFormKey();
-            $params['qty'] = $customQuote->getQty();
+            /*$params['qty'] = $customQuote->getQty();
             $params['product'] = $customQuote->getProductId();
             $params['item'] = $customQuote->getProductId();
 
@@ -248,10 +235,13 @@ class Save
             }
 
             $this->cart->addProduct($product, $params);
-            return $this->cart->save();
+            return $this->cart->save();*/
             /*}*/
+
+            return $cartObj;
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
+            return null;
         }
     }
 
