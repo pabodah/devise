@@ -7,17 +7,12 @@ namespace Devis\Quotation\Model\Quote;
 use Devis\Quotation\Model\QuotationFactory as CustomQuotationFactory;
 use Devis\Quotation\Model\QuotationRepository as CustomQuotationRepository;
 use Devis\Quotation\Model\ResourceModel\Quotation as ResourceQuotation;
-use Magento\Catalog\Model\ProductFactory;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Checkout\Model\Cart;
-use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\Response\Http\FileFactory;
-use Magento\Framework\Data\Form\FormKey;
 use Magento\Framework\Stdlib\DateTime\DateTime;
-use Magento\Framework\UrlInterface;
-use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\QuoteFactory;
 use Psr\Log\LoggerInterface;
 
@@ -27,98 +22,91 @@ class Save
      * @var FileFactory
      */
     protected $fileFactory;
-
     /**
      * @var DateTime
      */
     protected $dateTime;
-
-    /**
-     * @var CartRepositoryInterface
-     */
-    protected $cartRepositoryInterface;
-
-    /**
-     * @var Session
-     */
-    protected $checkoutSession;
-
     /**
      * @var LoggerInterface
      */
     protected $logger;
-
+    /**
+     * @var CustomQuotationFactory
+     */
     protected $quotationFactory;
-
+    /**
+     * @var ResourceQuotation
+     */
     protected $resourceQuotation;
-
-    protected $productFactory;
-
+    /**
+     * @var ProductRepository
+     */
     protected $productRepository;
-    protected $formKey;
-    protected $productModel;
+    /**
+     * @var
+     */
     protected $cart;
+    /**
+     * @var CustomQuotationRepository
+     */
     protected $quotationRepository;
-
+    /**
+     * @var ScopeConfigInterface
+     */
     protected $scopeConfig;
-
-    protected $urlBuilder;
-
+    /**
+     * @var \Magento\Theme\Block\Html\Header\Logo
+     */
     protected $logo;
+    /**
+     * @var QuoteFactory
+     */
     protected $quoteFactory;
 
     /**
-     * Pdf constructor.
+     * Save constructor.
      * @param FileFactory $fileFactory
      * @param DateTime $dateTime
-     * @param CartRepositoryInterface $cartRepositoryInterface
-     * @param Session $checkoutSession
      * @param LoggerInterface $logger
      * @param CustomQuotationFactory $quotationFactory
      * @param ResourceQuotation $resourceQuotation
-     * @param ProductFactory $productFactory
      * @param ProductRepository $productRepository
      * @param CustomQuotationRepository $quotationRepository
-     * @param FormKey $formKey
      * @param Cart $cart
      * @param ScopeConfigInterface $scopeConfig
+     * @param \Magento\Theme\Block\Html\Header\Logo $logo
+     * @param QuoteFactory $quoteFactory
      */
     public function __construct(
         FileFactory $fileFactory,
         DateTime $dateTime,
-        CartRepositoryInterface $cartRepositoryInterface,
-        Session $checkoutSession,
         LoggerInterface $logger,
         CustomQuotationFactory $quotationFactory,
         ResourceQuotation $resourceQuotation,
-        ProductFactory $productFactory,
         ProductRepository $productRepository,
         CustomQuotationRepository $quotationRepository,
-        FormKey $formKey,
         Cart $cart,
         ScopeConfigInterface $scopeConfig,
-        UrlInterface $urlBuilder,
         \Magento\Theme\Block\Html\Header\Logo $logo,
         QuoteFactory $quoteFactory
     ) {
         $this->fileFactory = $fileFactory;
         $this->dateTime = $dateTime;
-        $this->cartRepositoryInterface = $cartRepositoryInterface;
-        $this->checkoutSession = $checkoutSession;
         $this->logger = $logger;
         $this->quotationFactory = $quotationFactory;
         $this->resourceQuotation = $resourceQuotation;
-        $this->productFactory = $productFactory;
         $this->productRepository = $productRepository;
         $this->quotationRepository = $quotationRepository;
         $this->cart = $cart;
         $this->scopeConfig = $scopeConfig;
-        $this->urlBuilder = $urlBuilder;
         $this->logo = $logo;
         $this->quoteFactory = $quoteFactory;
     }
 
     /**
+     * Product detail page and Cart page has Get Quotation button
+     * when the button is clicked, a record will be saved in devis_quotation table
+     * A PDF will be downloaded
      * @param $params
      * @param $type
      * @return mixed
@@ -127,11 +115,11 @@ class Save
     {
         try {
             if ($type == 'product') {
+                // get data from the product detail page
                 $productIds[0] = $params["product"];
                 $qty[0] = $params["qty"];
                 $attr[0] = $params['attributes'];
                 $attrVal[0] = $params['attribute_values'];
-
 
                 $model = $this->quotationFactory->create();
                 $model->setData('product_id', json_encode($productIds));
@@ -145,8 +133,8 @@ class Save
 
                 $this->resourceQuotation->save($model);
                 return $model->getId();
-
             } else {
+                // get data from cart page
                 $items = $params->getItems();
                 $productIds = [];
                 $qty = [];
@@ -187,19 +175,19 @@ class Save
                 return $model->getId();
             }
         } catch (\Exception $e) {
-            $this->logger->debug($e->getMessage());
+            $this->logger->error($e->getMessage());
             return false;
         }
     }
 
     /**
-     * Save custom quote data in Magento quote
+     * Save custom quote data in Magento quote, add products to cart and redirect to the cart page
      * @param $id
      * @return Cart
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function saveToQuote($id)
+    public function addToCart($id)
     {
         try {
             $customQuote = $this->quotationRepository->getById($id);
@@ -209,36 +197,21 @@ class Save
             $i = 0;
             $cartObj = null;
 
-            if (is_array($customQuote->getProductId())) {
-                foreach (json_decode($customQuote->getProductId()) as $itemId) {
-                    $params['product'] = $itemId;
-                    $params['qty'] = json_decode($customQuote->getQty())[$i];
-                    $params['item'] = json_decode($customQuote->getProductId())[$i];
+            foreach (json_decode($customQuote->getProductId()) as $itemId) {
+                $params['product'] = $itemId;
+                $params['qty'] = json_decode($customQuote->getQty())[$i];
+                $params['item'] = json_decode($customQuote->getProductId())[$i];
 
-                    if (json_decode($customQuote->getProductOptions())) {
-                        foreach (json_decode($customQuote->getProductOptions())[$i] as $key=>$value) {
-                            $options[$key] = $value;
-                            $params['super_attribute'] = $options;
-                        }
-                    }
-                    $product = $this->productRepository->getById($itemId);
-                    $this->cart->addProduct($product, $params);
-
-                    $i++;
-                }
-            } else {
-                $params['product'] = $customQuote->getProductId();
-                $params['qty'] = $customQuote->getQty();
-                $params['item'] = $customQuote->getProductId();
-
-                if ($customQuote->getProductOptions()) {
-                    foreach (json_decode($customQuote->getProductOptions()) as $key=>$value) {
+                if (json_decode($customQuote->getProductOptions())) {
+                    foreach (json_decode($customQuote->getProductOptions())[$i] as $key=>$value) {
                         $options[$key] = $value;
                         $params['super_attribute'] = $options;
                     }
                 }
-                $product = $this->productRepository->getById($customQuote->getProductId());
+                $product = $this->productRepository->getById($itemId);
                 $this->cart->addProduct($product, $params);
+
+                $i++;
             }
 
             $cartObj = $this->cart->save();
@@ -351,67 +324,6 @@ class Save
             $this->logger->error($e->getMessage());
         }
         return false;
-    }
-
-    public function pdf()
-    {
-        $pdf = new \Zend_Pdf();
-        $pdf->pages[] = $pdf->newPage(\Zend_Pdf_Page::SIZE_A4);
-        $page = $pdf->pages[0]; // this will get reference to the first page.
-        $style = new \Zend_Pdf_Style();
-        $style->setLineColor(new \Zend_Pdf_Color_Rgb(0, 0, 0));
-        $font = \Zend_Pdf_Font::fontWithName(\Zend_Pdf_Font::FONT_TIMES);
-        $style->setFont($font, 15);
-        $page->setStyle($style);
-        $width = $page->getWidth();
-        $hight = $page->getHeight();
-        $x = 30;
-        $pageTopalign = 850; //default PDF page height
-        $this->y = 850 - 100; //print table row from page top – 100px
-        //Draw table header row’s
-        $style->setFont($font, 16);
-        $page->setStyle($style);
-        $page->drawRectangle(30, $this->y + 10, $page->getWidth()-30, $this->y +70, \Zend_Pdf_Page::SHAPE_DRAW_STROKE);
-
-        $style->setFont($font, 11);
-        $page->setStyle($style);
-        $page->drawText(__("Quote ID : %1", '10000'), $x + 5, $this->y+33, 'UTF-8');
-
-        $style->setFont($font, 12);
-        $page->setStyle($style);
-        $page->drawText(__("Product Name"), $x + 60, $this->y-10, 'UTF-8');
-        $page->drawText(__("Product Options"), $x + 200, $this->y-10, 'UTF-8');
-
-        $style->setFont($font, 10);
-        $page->setStyle($style);
-        $add = 9;
-        $page->drawText('Test', $x + 210, $this->y-30, 'UTF-8');
-        $pro = 'TEST2';
-        $page->drawText($pro, $x + 65, $this->y-30, 'UTF-8');
-        $page->drawRectangle(30, $this->y -62, $page->getWidth()-30, $this->y + 10, \Zend_Pdf_Page::SHAPE_DRAW_STROKE);
-
-        $style->setFont($font, 10);
-        $page->setStyle($style);
-        $page->drawText('TESTEST', $x + 65, $this->y-100);
-
-        $style->setFont($font, 10);
-        $page->setStyle($style);
-        /*$page->drawText(__("ABC Footer example"), ($page->getWidth()/2)-50, $this->y-200);*/
-
-        $logoUrl = $this->getLogoSrc();
-        if ($logoUrl) {
-            if (is_file($logoUrl)) {
-                $pdfImage = \Zend_Pdf_Image::imageWithPath($logoUrl);
-                $page->drawImage($pdfImage, 10, 500);
-            }
-        }
-
-        return $this->fileFactory->create(
-            sprintf('quotation.pdf', $this->dateTime->date('Y-m-d_H-i-s')),
-            $pdf->render(),
-            DirectoryList::VAR_DIR,
-            'application/pdf'
-        );
     }
 
     public function getLogoSrc()

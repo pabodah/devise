@@ -11,6 +11,9 @@ use Devis\Quotation\Model\Quote\Save as QuoteSave;
 class AddToCart extends Action
 {
 
+    /**
+     * @var QuoteSave
+     */
     protected $quoteSave;
 
     /**
@@ -33,7 +36,7 @@ class AddToCart extends Action
     public function execute()
     {
         $id = $this->getRequest()->getParam('id');
-        $cart = $this->quoteSave->saveToQuote($id);
+        $cart = $this->quoteSave->addToCart($id);
 
         if ($cart) {
             $resultRedirect = $this->resultRedirectFactory->create();

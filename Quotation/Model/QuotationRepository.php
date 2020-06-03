@@ -1,13 +1,11 @@
 <?php
+/**
+ * Copyright (c) Devis
+ */
 namespace Devis\Quotation\Model;
 
 use Magento\Framework\Api\DataObjectHelper;
-use Magento\Framework\Api\SearchCriteriaInterface;
-use Magento\Framework\Api\Search\FilterGroup;
-use Magento\Framework\Api\SortOrder;
 use Magento\Framework\Exception\CouldNotSaveException;
-use Magento\Framework\Exception\StateException;
-use Magento\Framework\Exception\ValidatorException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Devis\Quotation\Api\QuotationRepositoryInterface;
 use Devis\Quotation\Api\Data\QuotationInterface;
@@ -18,18 +16,39 @@ use Devis\Quotation\Model\ResourceModel\Quotation\CollectionFactory as Quotation
 
 class QuotationRepository implements QuotationRepositoryInterface
 {
+    /**
+     * @var array
+     */
     protected $instances = [];
-
+    /**
+     * @var ResourceData
+     */
     protected $resource;
-
+    /**
+     * @var QuotationCollectionFactory
+     */
     protected $quotationCollectionFactory;
-
+    /**
+     * @var QuotationSearchResultsInterfaceFactory
+     */
     protected $searchResultsFactory;
-
+    /**
+     * @var QuotationInterfaceFactory
+     */
     protected $quotationInterfaceFactory;
-
+    /**
+     * @var DataObjectHelper
+     */
     protected $quotationObjectHelper;
 
+    /**
+     * QuotationRepository constructor.
+     * @param ResourceData $resource
+     * @param QuotationCollectionFactory $dataCollectionFactory
+     * @param QuotationSearchResultsInterfaceFactory $dataSearchResultsInterfaceFactory
+     * @param QuotationInterfaceFactory $dataInterfaceFactory
+     * @param DataObjectHelper $dataObjectHelper
+     */
     public function __construct(
         ResourceData $resource,
         QuotationCollectionFactory $dataCollectionFactory,
@@ -44,7 +63,10 @@ class QuotationRepository implements QuotationRepositoryInterface
         $this->quotationObjectHelper = $dataObjectHelper;
     }
 
-
+    /**
+     * @param $id
+     * @return mixed|void
+     */
     public function get($id)
     {
         // TODO: Implement get() method.
@@ -64,6 +86,11 @@ class QuotationRepository implements QuotationRepositoryInterface
         return $this->instances[$dataId];
     }
 
+    /**
+     * @param QuotationInterface $quotation
+     * @return QuotationInterface|\Magento\Framework\Model\AbstractModel|mixed
+     * @throws CouldNotSaveException
+     */
     public function saveQuotation(QuotationInterface $quotation)
     {
         try {

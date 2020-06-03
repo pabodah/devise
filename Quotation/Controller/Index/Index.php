@@ -15,7 +15,6 @@ class Index extends Action
      * @var QuoteSave
      */
     protected $quoteSave;
-
     /**
      * @var Cart
      */
@@ -24,6 +23,8 @@ class Index extends Action
     /**
      * Index constructor.
      * @param Context $context
+     * @param QuoteSave $quoteSave
+     * @param Cart $cart
      */
     public function __construct(
         Context $context,
@@ -44,26 +45,15 @@ class Index extends Action
         if ($this->getRequest()->getParam('attribute_data')) {
             $attributes = $this->getRequest()->getParam('attribute_data');
             $customQuote = $this->quoteSave->createCustomQuote($attributes, 'product');
-
-            return $this->resultFactory
-                ->create(\Magento\Framework\Controller\ResultFactory::TYPE_JSON)
-                ->setData([
-                    'status'  => $customQuote
-                ]);
         } else {
             $customQuote = $this->quoteSave->createCustomQuote($this->cart->getQuote(), 'quote');
-
-            return $this->resultFactory
-                ->create(\Magento\Framework\Controller\ResultFactory::TYPE_JSON)
-                ->setData([
-                    'status'  => $customQuote
-                ]);
-            /*if ($quote) {
-                $resultRedirect = $this->resultRedirectFactory->create();
-                $resultRedirect->setPath('checkout/cart');
-                return $resultRedirect;
-            }*/
         }
+
+        return $this->resultFactory
+            ->create(\Magento\Framework\Controller\ResultFactory::TYPE_JSON)
+            ->setData([
+                'status'  => $customQuote
+            ]);
 
     }
 }
