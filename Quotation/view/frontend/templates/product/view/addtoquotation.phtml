@@ -5,14 +5,17 @@
 
 /** @var $block \Devis\Quotation\Block\Product\View\AddToQuotation */
 ?>
-<?php if ($block->isQuotationEnabled()) :?>
-<div class="actions">
-    <button type="button"
-            title="<?= __('Get Quotation') ?>"
-            class="action primary tocart"
-            data-mage-init='{"Devis_Quotation/js/quotation": {"config": "element"}}'
-            id="product-addtoquote-button" disabled>
-        <span><?= __('Get Quotation') ?></span>
-    </button>
-</div>
+<?php $product = $block->getProduct(); ?>
+<?php if (!$product->isSaleable() && $block->isQuotationEnabled()) : ?>
+    <?php $validators = json_encode($block->getQuantityValidators()); ?>
+    <div class="actions">
+        <button type="button"
+                title="<?= __('Get Quotation') ?>"
+                class="action primary tocart"
+                data-mage-init='{"Devis_Quotation/js/quotation": {"config": "element"}}'
+                id="product-addtoquote-button"
+                data-validate="<?php echo $block->escapeHtml($validators)?>">
+            <span><?= __('Get Quotation') ?></span>
+        </button>
+    </div>
 <?php endif; ?>

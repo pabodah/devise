@@ -149,7 +149,7 @@ class Save
 
                     $attributes = $item->getProduct()->getTypeInstance(true)->getOrderOptions($item->getProduct());
 
-                    if (isset($customOptions)) {
+                    if (isset($attributes['attributes_info'])) {
                         $customOptions = $attributes['attributes_info'];
                         $product_options = [];
                         $product_options_names = [];
