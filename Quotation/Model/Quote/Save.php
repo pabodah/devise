@@ -118,8 +118,6 @@ class Save
                 // get data from the product detail page
                 $productIds[0] = $params["product"];
                 $qty[0] = $params["qty"];
-                $attr[0] = $params['attributes'];
-                $attrVal[0] = $params['attribute_values'];
 
                 $model = $this->quotationFactory->create();
                 $model->setData('product_id', json_encode($productIds));
@@ -127,6 +125,8 @@ class Save
                 $model->setData('quote_id', 0);
 
                 if (isset($params['attributes'])) {
+                    $attr[0] = $params['attributes'];
+                    $attrVal[0] = $params['attribute_values'];
                     $model->setData('product_options', json_encode($attr));
                     $model->setData('product_options_names', json_encode($attrVal));
                 }
@@ -148,18 +148,21 @@ class Save
                     $qty[] = $item->getQty();
 
                     $attributes = $item->getProduct()->getTypeInstance(true)->getOrderOptions($item->getProduct());
-                    $customOptions = $attributes['attributes_info'];
-                    $product_options = [];
-                    $product_options_names = [];
-                    if (!empty($customOptions)) {
-                        foreach ($customOptions as $option) {
-                            $product_options[$option['option_id']] = $option['option_value'];
-                            $product_options_names[$option['label']] = $option['value'];
-                        }
-                    }
 
-                    $customOptions_ids[] = $product_options;
-                    $customOptions_values[] = $product_options_names;
+                    if (isset($customOptions)) {
+                        $customOptions = $attributes['attributes_info'];
+                        $product_options = [];
+                        $product_options_names = [];
+                        if (!empty($customOptions)) {
+                            foreach ($customOptions as $option) {
+                                $product_options[$option['option_id']] = $option['option_value'];
+                                $product_options_names[$option['label']] = $option['value'];
+                            }
+                        }
+
+                        $customOptions_ids[] = $product_options;
+                        $customOptions_values[] = $product_options_names;
+                    }
                 }
 
                 if (isset($customOptions)) {
