@@ -54,4 +54,12 @@ class AddToQuotation extends Template
     {
         return $this->registry->registry('current_product')->getId();
     }
+
+    /**
+     * @return mixed|null
+     */
+    public function getProduct()
+    {
+        return $this->registry->registry('current_product');
+    }
 }

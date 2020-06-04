@@ -6,7 +6,7 @@
 /** @var $block \Devis\Quotation\Block\Product\View\AddToQuotation */
 ?>
 <?php $product = $block->getProduct(); ?>
-<?php if (!$product->isSaleable() && $block->isQuotationEnabled()) : ?>
+<?php if ($product->isSaleable() && $block->isQuotationEnabled()) : ?>
     <?php $validators = json_encode($block->getQuantityValidators()); ?>
     <div class="actions">
         <button type="button"
