@@ -145,7 +145,7 @@ class Save
 
                 foreach ($items as $item) {
                     $productIds[] = $item->getProductId();
-                    $qty[] = $item->getQty();
+                    $qty[] = (string)$item->getQty();
 
                     $attributes = $item->getProduct()->getTypeInstance(true)->getOrderOptions($item->getProduct());
 
@@ -162,6 +162,9 @@ class Save
 
                         $customOptions_ids[] = $product_options;
                         $customOptions_values[] = $product_options_names;
+                    } else {
+                        $customOptions_ids[] = [];
+                        $customOptions_values[] = [];
                     }
                 }
 
