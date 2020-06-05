@@ -1,25 +1,51 @@
 define([
     'jquery',
-    'loader'
+    'loader',
 ], function ($) {
     'use strict';
 
+
     $( "#product-addtoquote-button" ).click(function() {
         var body = $('body');
+        var isError = 0;
+        $('.qty .control').find('.mage-error').remove();
+        $('div.swatch-attribute').find('.mage-error').remove();
+
         body.loader('show');
 
-        $.ajax ({
-            showLoader: true,
-            url: BASE_URL + ('quotation/index/index'),
-            dataType: 'json',
-            data: {
-                attribute_data : getAttributeData()
-            },
-            success: function(data) {
-                window.location.replace(BASE_URL + ('quotation/index/pdf/id/') + data.status);
-                body.loader('hide');
+        $('div.swatch-attribute').each(function(k, v){
+            var option_selected = $(v).attr('option-selected');
+
+            if(!option_selected)
+            {
+                $(v).append('<div class="mage-error" generated="true">This is a required field.</div>');
             }
         });
+
+        if (!isValid()) {
+            isError = 1;
+        }
+
+        if (parseInt($('.qty .control .input-text.qty').val()) < 1) {
+            $('.qty .control').append('<div class="mage-error" generated="true">Please enter a valid qty.</div>');
+        }
+
+        if (!isError && parseInt($('.qty .control .input-text.qty').val()) > 0) {
+            $.ajax ({
+                showLoader: true,
+                url: BASE_URL + ('quotation/index/index'),
+                dataType: 'json',
+                data: {
+                    attribute_data : getAttributeData()
+                },
+                success: function(data) {
+                    window.location.replace(BASE_URL + ('quotation/index/pdf/id/') + data.status);
+                    body.loader('hide');
+                }
+            });
+        } else {
+            body.loader('hide');
+        }
     });
 
     $( "#product-addtoquote-button-checkout" ).click(function() {
@@ -37,6 +63,30 @@ define([
             }
         });
     });
+
+    function isValid()
+    {
+        var missingData = 0;
+
+        $('div.swatch-attribute').each(function(k, v){
+
+            var attribute_id    = $(v).attr('attribute-id');
+            var option_selected = $(v).attr('option-selected');
+
+            //if value is not available
+            if(!attribute_id || !option_selected){
+                missingData = 1;
+                return false;
+            }
+        });
+
+        if (missingData) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 
     function getAttributeData ()
     {
