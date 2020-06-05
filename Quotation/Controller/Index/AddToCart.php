@@ -10,7 +10,6 @@ use Devis\Quotation\Model\Quote\Save as QuoteSave;
 
 class AddToCart extends Action
 {
-
     /**
      * @var QuoteSave
      */

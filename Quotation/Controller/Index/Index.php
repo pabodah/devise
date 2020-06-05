@@ -7,7 +7,7 @@ namespace Devis\Quotation\Controller\Index;
 use Devis\Quotation\Model\Quote\Save as QuoteSave;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
-use Magento\Checkout\Model\Cart;
+use Magento\Checkout\Model\Session;
 
 class Index extends Action
 {
@@ -16,7 +16,7 @@ class Index extends Action
      */
     protected $quoteSave;
     /**
-     * @var Cart
+     * @var Session
      */
     protected $cart;
 
@@ -24,12 +24,12 @@ class Index extends Action
      * Index constructor.
      * @param Context $context
      * @param QuoteSave $quoteSave
-     * @param Cart $cart
+     * @param Session $cart
      */
     public function __construct(
         Context $context,
         QuoteSave $quoteSave,
-        Cart $cart
+        Session $cart
     ) {
         parent::__construct($context);
         $this->quoteSave = $quoteSave;
@@ -42,8 +42,9 @@ class Index extends Action
      */
     public function execute()
     {
-        if ($this->getRequest()->getParam('attribute_data')) {
-            $attributes = $this->getRequest()->getParam('attribute_data');
+        $attributes = $this->getRequest()->getParam('attribute_data');
+
+        if ($attributes) {
             $customQuote = $this->quoteSave->createCustomQuote($attributes, 'product');
         } else {
             $customQuote = $this->quoteSave->createCustomQuote($this->cart->getQuote(), 'quote');

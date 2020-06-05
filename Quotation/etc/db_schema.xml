@@ -5,8 +5,8 @@
         <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="ID"/>
         <column xsi:type="varchar" name="product_id" comment="Product ID"/>
         <column xsi:type="varchar" name="qty" comment="Qty"/>
-        <column xsi:type="varchar" name="product_options" comment="Product Options"/>
-        <column xsi:type="varchar" name="product_options_names" comment="Product Options Names"/>
+        <column xsi:type="text" name="product_options" comment="Product Options"/>
+        <column xsi:type="text" name="product_options_names" comment="Product Options Text"/>
         <column xsi:type="int" name="quote_id" padding="10" comment="Quote ID"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>
